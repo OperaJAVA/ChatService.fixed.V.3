@@ -26,6 +26,7 @@ class ChatService {
         val chat = chats.filter { entry -> entry.key.containsAll(userIds) }.values.firstOrNull()
         chat?.messages?.onEach { message -> message.isRead = true }
         return chat?.messages ?: emptyList()
+
     }
 
     // Метод для пометки сообщений в чате как прочитанных
@@ -66,17 +67,22 @@ class ChatService {
                 }
         }
     }
-// Вот реализация метода readMessagesFromChatById, которая повторяет функциональность метода getMessagesFromChat,
+
+    // Вот реализация метода readMessagesFromChatById, которая повторяет функциональность метода getMessagesFromChat,
 // но также вставляет вызов метода take:
 // Метод для пометки сообщений в чате как прочитанных по идентификатору пользователя и количеству сообщений
     fun readMessagesFromChatById(userIds: Set<Int>, messageCount: Int): List<Message> {
         return chats.filter { entry -> entry.key.containsAll(userIds) } // Фильтруем чаты, чтобы оставить только те, которые содержат id всех пользователей из переданного множества
             .values // Оставляем только значения из отфильтрованной коллекции (отбрасываем ключи)
+            .asSequence()
             .firstOrNull() // Если получившийся список пустой, то возвращаем null, если нет - берем только первый чат из него
             ?.messages // Взять сообщения из этого чата
             ?.takeLast(messageCount) // Взять messageCount с конца списка (если не хватит, то вернет сколько есть)
-            ?.onEach { message -> message.isRead = true } // На каждом элементе списка выполнить действие message.isRead = true (пометить прочитанным), onEach возвращает тот же список, на котором вызывался
-            ?: emptyList() // Если на каком-то шаге поймали null, то вернуть пустой список
+            ?.onEach { message ->
+                message.isRead = true
+            } // На каждом элементе списка выполнить действие message.isRead = true (пометить прочитанным), onEach возвращает тот же список, на котором вызывался
+            ?: emptyList<Message>() // Если на каком-то шаге поймали null, то вернуть пустой список
+                .toList()
 
     }
 }
